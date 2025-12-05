@@ -9,17 +9,17 @@
 #define FIELD_WIDTH 500
 #define FIELD_HEIGHT 500
 
-#define FIELD_BORDER_THICKNESS 6
+#define FIELD_BORDER_THICKNESS 1
 
 #define FIELD_CELL_HEIGHT ((FIELD_HEIGHT - FIELD_BORDER_THICKNESS * 9) / 8)
 #define FIELD_CELL_WIDTH ((FIELD_WIDTH - FIELD_BORDER_THICKNESS * 9) / 8)
 
 #define BLOCK_CELL_HEIGHT FIELD_CELL_HEIGHT
 #define BLOCK_CELL_WIDTH FIELD_CELL_WIDTH
-#define BLOCK_CELL_BORDER_THICKNESS (FIELD_BORDER_THICKNESS)
+#define BLOCK_CELL_BORDER_THICKNESS (6)
 
-#define EMPTY_CELL_COLOR LIGHTGRAY
-#define FIELD_BACKGROUND_COLOR DARKBLUE
+#define EMPTY_CELL_COLOR ColorBrightness(LIGHTGRAY, -0.225f)
+#define FIELD_BORDER_COLOR DARKGRAY
 
 Color field[FIELD_SIZE * FIELD_SIZE];
 
@@ -174,43 +174,65 @@ Vector2 clamp_block_pos_to_field(Vector2 coords, const Block* block) {
              .cell_coords =     \
                  (const Vector2[]){{0, -2}, {0, -1}, {0, 0}, {0, 1}, {0, 2}}})
 
+void draw_field_cell(Vector2 pos, Color color, bool transparent) {
+    Color mod_color = ColorAlpha(color, transparent ? 0.5f : 1.0f);
+
+    DrawRectangleV(pos, (Vector2){BLOCK_CELL_WIDTH, BLOCK_CELL_HEIGHT},
+                   ColorBrightness(mod_color, -0.225f));
+    // DrawRectangleV(
+    //     Vector2Add(pos, (Vector2){(BLOCK_CELL_BORDER_THICKNESS * 2) / 2,
+    //                               (BLOCK_CELL_BORDER_THICKNESS * 2) / 2}),
+    //     Vector2Add((Vector2){BLOCK_CELL_WIDTH, BLOCK_CELL_HEIGHT},
+    //                (Vector2){-(BLOCK_CELL_BORDER_THICKNESS * 2),
+    //                          -(BLOCK_CELL_BORDER_THICKNESS * 2)}),
+    //     mod_color);
+}
+
 void draw_block_cell(Vector2 pos, Color color, bool transparent) {
     Color mod_color = ColorAlpha(color, transparent ? 0.5f : 1.0f);
 
-    DrawRectangleV(pos, (Vector2){BLOCK_CELL_HEIGHT, BLOCK_CELL_WIDTH},
-                   ColorBrightness(mod_color, -0.225f));
+    DrawRectangleV(pos, (Vector2){BLOCK_CELL_WIDTH, BLOCK_CELL_HEIGHT},
+                   ColorBrightness(mod_color, -0.3f));
+    DrawRectangleV(pos,
+                   Vector2Add((Vector2){BLOCK_CELL_WIDTH, BLOCK_CELL_HEIGHT},
+                              (Vector2){-(BLOCK_CELL_BORDER_THICKNESS), -(BLOCK_CELL_BORDER_THICKNESS)}),
+                   ColorBrightness(mod_color, 0));
     DrawRectangleV(
         Vector2Add(pos, (Vector2){(BLOCK_CELL_BORDER_THICKNESS * 2) / 2,
                                   (BLOCK_CELL_BORDER_THICKNESS * 2) / 2}),
-        Vector2Add((Vector2){BLOCK_CELL_HEIGHT, BLOCK_CELL_WIDTH},
+        Vector2Add((Vector2){BLOCK_CELL_WIDTH, BLOCK_CELL_HEIGHT},
                    (Vector2){-(BLOCK_CELL_BORDER_THICKNESS * 2),
                              -(BLOCK_CELL_BORDER_THICKNESS * 2)}),
-        mod_color);
+        ColorBrightness(mod_color, -0.075f));
 }
 
 void draw_block(const Block* block, Vector2 pos, bool transparent) {
     for (int i = 0; i < block->n_cells; ++i) {
         draw_block_cell(
             Vector2Add(
-                pos,
-                Vector2Multiply(
-                    get_block_cell_coord(block, i),
-                    (Vector2){BLOCK_CELL_HEIGHT + BLOCK_CELL_BORDER_THICKNESS,
-                              BLOCK_CELL_WIDTH + BLOCK_CELL_BORDER_THICKNESS})),
+                pos, Vector2Multiply(
+                         get_block_cell_coord(block, i),
+                         (Vector2){
+                             BLOCK_CELL_WIDTH + FIELD_BORDER_THICKNESS,
+                             BLOCK_CELL_HEIGHT + FIELD_BORDER_THICKNESS})),
             block->color, transparent);
     }
 }
 
 void draw_field(int root_x, int root_y) {
     DrawRectangle(root_x, root_y, FIELD_WIDTH, FIELD_HEIGHT,
-                  FIELD_BACKGROUND_COLOR);
+                  FIELD_BORDER_COLOR);
     for (int i = 0; i < FIELD_SIZE * FIELD_SIZE; ++i) {
         Vector2 cell_pos = (Vector2){
             apply_board_offset(root_x) +
                 (i % 8) * (FIELD_CELL_WIDTH + FIELD_BORDER_THICKNESS),
             apply_board_offset(root_y) +
                 (i / 8) * (FIELD_CELL_HEIGHT + FIELD_BORDER_THICKNESS)};
-        draw_block_cell(cell_pos, field[i], false);
+        if (ColorIsEqual(field[i], EMPTY_CELL_COLOR)) {
+            draw_field_cell(cell_pos, field[i], false);
+        } else {
+            draw_block_cell(cell_pos, field[i], false);
+        }
     }
 }
 
