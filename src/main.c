@@ -11,8 +11,8 @@
 
 #define FIELD_BORDER_THICKNESS 1
 
-#define FIELD_CELL_HEIGHT ((FIELD_HEIGHT - FIELD_BORDER_THICKNESS * 9) / 8)
-#define FIELD_CELL_WIDTH ((FIELD_WIDTH - FIELD_BORDER_THICKNESS * 9) / 8)
+#define FIELD_CELL_HEIGHT ((float)(FIELD_HEIGHT - FIELD_BORDER_THICKNESS * (FIELD_SIZE)) / FIELD_SIZE)
+#define FIELD_CELL_WIDTH ((float)(FIELD_WIDTH - FIELD_BORDER_THICKNESS * (FIELD_SIZE)) / FIELD_SIZE)
 
 #define BLOCK_CELL_HEIGHT FIELD_CELL_HEIGHT
 #define BLOCK_CELL_WIDTH FIELD_CELL_WIDTH
@@ -57,7 +57,7 @@ static inline int vector_field_index(Vector2 v) {
 }
 
 static inline bool vector_in_field_bounds(Vector2 v) {
-    return v.x >= 0 && v.y >= 0 && v.x < 8 && v.y < 8;
+    return v.x >= 0 && v.y >= 0 && v.x < FIELD_SIZE && v.y < FIELD_SIZE;
 }
 
 typedef struct Block {
@@ -226,9 +226,9 @@ void draw_field(int root_x, int root_y) {
     for (int i = 0; i < FIELD_SIZE * FIELD_SIZE; ++i) {
         Vector2 cell_pos = (Vector2){
             apply_board_offset(root_x) +
-                (i % 8) * (FIELD_CELL_WIDTH + FIELD_BORDER_THICKNESS),
+                (i % FIELD_SIZE) * (FIELD_CELL_WIDTH + FIELD_BORDER_THICKNESS),
             apply_board_offset(root_y) +
-                (i / 8) * (FIELD_CELL_HEIGHT + FIELD_BORDER_THICKNESS)};
+                (i / FIELD_SIZE) * (FIELD_CELL_HEIGHT + FIELD_BORDER_THICKNESS)};
         if (ColorIsEqual(field[i], EMPTY_CELL_COLOR)) {
             draw_field_cell(cell_pos, field[i], false);
         } else {
