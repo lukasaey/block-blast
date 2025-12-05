@@ -195,7 +195,8 @@ void draw_block_cell(Vector2 pos, Color color, bool transparent) {
                    ColorBrightness(mod_color, -0.3f));
     DrawRectangleV(pos,
                    Vector2Add((Vector2){BLOCK_CELL_WIDTH, BLOCK_CELL_HEIGHT},
-                              (Vector2){-(BLOCK_CELL_BORDER_THICKNESS), -(BLOCK_CELL_BORDER_THICKNESS)}),
+                              (Vector2){-(BLOCK_CELL_BORDER_THICKNESS),
+                                        -(BLOCK_CELL_BORDER_THICKNESS)}),
                    ColorBrightness(mod_color, 0));
     DrawRectangleV(
         Vector2Add(pos, (Vector2){(BLOCK_CELL_BORDER_THICKNESS * 2) / 2,
@@ -210,11 +211,11 @@ void draw_block(const Block* block, Vector2 pos, bool transparent) {
     for (int i = 0; i < block->n_cells; ++i) {
         draw_block_cell(
             Vector2Add(
-                pos, Vector2Multiply(
-                         get_block_cell_coord(block, i),
-                         (Vector2){
-                             BLOCK_CELL_WIDTH + FIELD_BORDER_THICKNESS,
-                             BLOCK_CELL_HEIGHT + FIELD_BORDER_THICKNESS})),
+                pos,
+                Vector2Multiply(
+                    get_block_cell_coord(block, i),
+                    (Vector2){BLOCK_CELL_WIDTH + FIELD_BORDER_THICKNESS,
+                              BLOCK_CELL_HEIGHT + FIELD_BORDER_THICKNESS})),
             block->color, transparent);
     }
 }
