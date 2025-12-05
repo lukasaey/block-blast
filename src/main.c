@@ -11,8 +11,10 @@
 
 #define FIELD_BORDER_THICKNESS 1
 
-#define FIELD_CELL_HEIGHT ((float)(FIELD_HEIGHT - FIELD_BORDER_THICKNESS * (FIELD_SIZE)) / FIELD_SIZE)
-#define FIELD_CELL_WIDTH ((float)(FIELD_WIDTH - FIELD_BORDER_THICKNESS * (FIELD_SIZE)) / FIELD_SIZE)
+#define FIELD_CELL_HEIGHT \
+    ((float)(FIELD_HEIGHT - FIELD_BORDER_THICKNESS * (FIELD_SIZE)) / FIELD_SIZE)
+#define FIELD_CELL_WIDTH \
+    ((float)(FIELD_WIDTH - FIELD_BORDER_THICKNESS * (FIELD_SIZE)) / FIELD_SIZE)
 
 #define BLOCK_CELL_HEIGHT FIELD_CELL_HEIGHT
 #define BLOCK_CELL_WIDTH FIELD_CELL_WIDTH
@@ -53,7 +55,7 @@ static inline Vector2 Vector2Floor(Vector2 v) {
 }
 
 static inline int vector_field_index(Vector2 v) {
-    return (int)v.x + (int)v.y * FIELD_SIZE;
+    return roundf(v.x) + roundf(v.y) * FIELD_SIZE;
 }
 
 static inline bool vector_in_field_bounds(Vector2 v) {
@@ -82,8 +84,7 @@ bool placed_block_fits_in_field(Vector2 coords, const Block* block) {
 bool placed_block_space_free(Vector2 coords, const Block* block) {
     for (int i = 0; i < block->n_cells; ++i) {
         Vector2 cell_pos = Vector2Add(coords, get_block_cell_coord(block, i));
-        Color cell_color =
-            field[(int)cell_pos.x + (int)cell_pos.y * FIELD_SIZE];
+        Color cell_color = field[vector_field_index(cell_pos)];
         if (!ColorIsEqual(cell_color, EMPTY_CELL_COLOR)) {
             return false;
         }
@@ -228,7 +229,8 @@ void draw_field(int root_x, int root_y) {
             apply_board_offset(root_x) +
                 (i % FIELD_SIZE) * (FIELD_CELL_WIDTH + FIELD_BORDER_THICKNESS),
             apply_board_offset(root_y) +
-                (i / FIELD_SIZE) * (FIELD_CELL_HEIGHT + FIELD_BORDER_THICKNESS)};
+                (i / FIELD_SIZE) *
+                    (FIELD_CELL_HEIGHT + FIELD_BORDER_THICKNESS)};
         if (ColorIsEqual(field[i], EMPTY_CELL_COLOR)) {
             draw_field_cell(cell_pos, field[i], false);
         } else {
@@ -238,6 +240,10 @@ void draw_field(int root_x, int root_y) {
 }
 
 int main(void) {
+    // Vector2 v = {.x = 0, .y = 1};
+    // int x = vector_field_index(v);
+    // printf("%g %g : %d\n", v.x, v.y, x);
+    // return 0;
     const int screenWidth = 800;
     const int screenHeight = 800;
 
@@ -265,13 +271,14 @@ int main(void) {
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
             vector_in_field_bounds(mouse_field_coords)) {
-            Vector2 clamped_pos = clamp_block_pos_to_field(
+            Vector2 clamped_coords = clamp_block_pos_to_field(
                 Vector2Floor(mouse_field_coords), &temp_block);
-            if (placed_block_space_free(clamped_pos, &temp_block)) {
+            if (placed_block_space_free(clamped_coords, &temp_block)) {
                 for (int i = 0; i < temp_block.n_cells; ++i) {
                     Vector2 cell_pos = Vector2Add(
-                        clamped_pos, get_block_cell_coord(&temp_block, i));
-                    field[vector_field_index(cell_pos)] = temp_block.color;
+                        clamped_coords, get_block_cell_coord(&temp_block, i));
+                    int index = vector_field_index(cell_pos);
+                    field[index] = temp_block.color;
                 }
             }
         }
@@ -282,10 +289,10 @@ int main(void) {
         draw_field(board_x, board_y);
 
         if (vector_in_field_bounds(mouse_field_coords)) {
-            Vector2 clamped_pos = clamp_block_pos_to_field(
+            Vector2 clamped_coords = clamp_block_pos_to_field(
                 Vector2Floor(mouse_field_coords), &temp_block);
             Vector2 translated_pos = translate_board_coords(
-                (Vector2){board_x, board_y}, (clamped_pos));
+                (Vector2){board_x, board_y}, (clamped_coords));
             draw_block(&temp_block, translated_pos, true);
         }
 
