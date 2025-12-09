@@ -180,13 +180,6 @@ void draw_field_cell(Vector2 pos, Color color, bool transparent) {
 
     DrawRectangleV(pos, (Vector2){BLOCK_CELL_WIDTH, BLOCK_CELL_HEIGHT},
                    ColorBrightness(mod_color, -0.225f));
-    // DrawRectangleV(
-    //     Vector2Add(pos, (Vector2){(BLOCK_CELL_BORDER_THICKNESS * 2) / 2,
-    //                               (BLOCK_CELL_BORDER_THICKNESS * 2) / 2}),
-    //     Vector2Add((Vector2){BLOCK_CELL_WIDTH, BLOCK_CELL_HEIGHT},
-    //                (Vector2){-(BLOCK_CELL_BORDER_THICKNESS * 2),
-    //                          -(BLOCK_CELL_BORDER_THICKNESS * 2)}),
-    //     mod_color);
 }
 
 void draw_block_cell(Vector2 pos, Color color, bool transparent) {
